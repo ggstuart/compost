@@ -24,6 +24,11 @@ class Dataset(object):
         # it important to convert to float before any interpolation is done
         self.measurements = measurements.astype(float)
 
+        # check we have data
+        self.count = int(self.measurements['value'].count())
+        if self.count == 0:
+            raise ShortDatasetError
+
         # always store as cumulative
         if not cumulative:
             self.data = self.measurements[:]
@@ -31,11 +36,10 @@ class Dataset(object):
         else:
             self.data = self.measurements.diff()[1:]
 
-        
         self.timestep = timedelta(seconds=timestep)
         self.earliest = self.measurements.index.min().to_datetime()
         self.latest = self.measurements.index.max().to_datetime()
-        self.count = int(self.measurements['value'].count())
+
 
     def total(self):
         "calculate total consumption - important to keep this the same"
