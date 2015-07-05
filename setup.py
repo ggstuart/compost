@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
-try:
-    import pandas
-except ImportError:
-    print("compost requires pandas to run")
+# try:
+#     import pandas
+# except ImportError:
+#     print("compost requires pandas to run")
 
 setup(name='compost',
-    version='0.2',
+    version='0.2.1',
     description='Compost is an energy consumption modelling toolkit for inverse modelling of energy consumption using measured data',
     keywords='energy consumption inverse modelling',
     classifiers=[
