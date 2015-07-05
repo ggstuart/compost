@@ -7,7 +7,7 @@ except ImportError:
     print("compost requires pandas to run")
 
 setup(name='compost',
-    version='0.1.2',
+    version='0.1.4',
     description='Compost is an energy consumption modelling toolkit for inverse modelling of energy consumption using measured data',
     keywords='energy consumption inverse modelling',
     classifiers=[
