@@ -15,6 +15,7 @@ class WeekdayAverageModel(object):
         data = Dataset(source_data, 60*60*24, cumulative).interpolate()
         source = data.measurements.diff().value[1:].groupby(data.measurements[1:].index.weekday)
         self.parameters = source.mean()
+        self.parameters.name = ['value']
 
     def prediction(self, index):
         return DataFrame(index=index).join(self.parameters, on=index.weekday).value
@@ -25,6 +26,7 @@ class MonthlyAverageModel(object):
         data = Dataset(source_data, 60*60*24, cumulative).interpolate()
         source = data.measurements.diff().value[1:].groupby(data.measurements[1:].index.month)
         self.parameters = source.mean()
+        self.parameters.name = ['value']
 
     def prediction(self, index):
         return DataFrame(index=index).join(self.parameters, on=index.month).value
