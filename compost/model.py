@@ -1,4 +1,4 @@
-from pandas import Series, DataFrame
+from pandas import Series, DataFrame, date_range
 from compost import Dataset
 
 class DailyAverageModel(object):
@@ -27,6 +27,12 @@ class MonthlyAverageModel(object):
         source = data.measurements.diff().value[1:].groupby(data.measurements[1:].index.month)
         self.parameters = source.mean()
         self.parameters.name = 'value'
+
+    def valid_for(self, prediction_range):
+        """confirm whether the model can predict for a given range of months"""
+        index = date_range(start=prediction_range.start_date, end=prediction_range.end_date, freq="MS")
+        result = DataFrame(index=index).join(self.parameters, on=index.month).value
+        return result.notnull().all()
 
     def prediction(self, index):
         return DataFrame(index=index).join(self.parameters, on=index.month).value
