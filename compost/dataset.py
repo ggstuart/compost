@@ -84,7 +84,14 @@ class Dataset(object):
 
         # deduplicate - remove NaNs that overlap with real data
         result["index"] = result.index
-        result.drop_duplicates(subset='index', inplace=True)#, take_last=True)
+
+        # backwards compatibility
+        try:
+            result.drop_duplicates(subset='index', inplace=True)#, take_last=True)
+        except TypeError:
+            # older versions of pandas work like this
+            result.drop_duplicates(cols='index', inplace=True)#, take_last=True)
+
         del result["index"]
 
         # interpolate to fill the NaNs
