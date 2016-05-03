@@ -2,7 +2,8 @@
 from .dataset import (
     Dataset,
     ShortDatasetError,
-    SubMinuteTimestepError
+    SubMinuteTimestepError,
+    InterpolationError
 )
 
 from .saving_calculation import (

@@ -6,7 +6,7 @@ from numpy import nan
 
 
 from compost import Dataset, ShortDatasetError, SubMinuteTimestepError
-from compost import SavingCalculation
+from compost import SavingCalculation, DailyAverageModel
 
 
 class TestDatasetCreation(unittest.TestCase):
@@ -236,7 +236,7 @@ class TestSavingCalculation(unittest.TestCase):
                 self.end_date = end
         baseline = DateRange(datetime(2015,1,1), datetime(2015,4,30))
         competition = DateRange(datetime(2015,5,1), datetime(2015,8,31))
-        sc = SavingCalculation(self.df, competition, baseline, cumulative=False)
+        sc = SavingCalculation(self.df, DailyAverageModel, competition, baseline, cumulative=False)
         savings = sc.savings()
 
 if __name__ == "__main__":

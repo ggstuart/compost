@@ -1,9 +1,10 @@
 from datetime import timedelta
-from pandas import date_range, DataFrame, Series, to_timedelta
+from pandas import date_range, DataFrame, Series, to_timedelta, Timestamp
 
 class DatasetError(Exception): pass
 class ShortDatasetError(DatasetError): pass
 class SubMinuteTimestepError(DatasetError): pass
+class InterpolationError(DatasetError): pass
 
 def timestep_to_pandas_freq(res):
     """convert a timedelta object to pandas formatted frequency string"""
@@ -23,6 +24,12 @@ class Dataset(object):
             raise SubMinuteTimestepError
         # it important to convert to float before any interpolation is done
         self.measurements = measurements.astype(float)
+
+        # force to timezone aware, UTC
+        try:
+            self.measurements = self.measurements.tz_localize('UTC')
+        except TypeError:
+            self.measurements = self.measurements.tz_convert('UTC')
 
         # check we have data
         self.count = int(self.measurements['value'].count())
@@ -79,28 +86,33 @@ class Dataset(object):
             end=self.latest+self.timestep,
             freq=pandas_freq,
             normalize=True,
+            tz='UTC'
         )
+
         result = result.append(DataFrame(index=regular_index, columns=['value']))
+
 
         # deduplicate - remove NaNs that overlap with real data
         result["index"] = result.index
-
-        # backwards compatibility
-        try:
-            result.drop_duplicates(subset='index', inplace=True)#, take_last=True)
-        except TypeError:
-            # older versions of pandas work like this
-            result.drop_duplicates(cols='index', inplace=True)#, take_last=True)
-
+        result.drop_duplicates(subset='index', inplace=True)
         del result["index"]
 
         # interpolate to fill the NaNs
         result = result.sort().interpolate(method="time", closed='left')
 
-        # resample to remove original data
-        # result = result.resample(pandas_freq, closed='left')
-        # pick out the data coresponding to regular_index
-        result = result.loc[regular_index.values]
+        try:
+            # resample to remove original data
+            # result = result.resample(pandas_freq, closed='left')
+            # pick out the data coresponding to regular_index
+            # keys = regular_index.values
+            keys = [Timestamp(v, tz="UTC") for v in regular_index.values]
+            result = result.loc[keys]
+            # result = result.loc[regular_index.values]
+        except KeyError:
+            print(Timestamp(regular_index.values[0], tz="UTC"), result.index[0])
+            keys = [Timestamp(v, tz="UTC") for v in regular_index.values]
+            print(result.loc[keys])
+            raise InterpolationError("Possible timezone mismatch?")
 
         # drop NaN values as they are not counted in validation
         return Dataset(result.dropna(), self.timestep.total_seconds(), cumulative=True)
