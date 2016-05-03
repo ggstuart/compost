@@ -19,6 +19,6 @@ setup(name='compost',
     ],
     author='Graeme Stuart',
     author_email='gstuart@dmu.ac.uk',
-    url='https://github.com/compost',
+    url='https://github.com/ggstuart/compost',
     packages=find_packages(),
 )
