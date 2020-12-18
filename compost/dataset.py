@@ -44,8 +44,8 @@ class Dataset(object):
             self.data = self.measurements.diff()[1:]
 
         self.timestep = timedelta(seconds=timestep)
-        self.earliest = self.measurements.index.min().to_datetime()
-        self.latest = self.measurements.index.max().to_datetime()
+        self.earliest = self.measurements.index.min().to_pydatetime()
+        self.latest = self.measurements.index.max().to_pydatetime()
 
 
     def total(self):
