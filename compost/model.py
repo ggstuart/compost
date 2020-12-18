@@ -7,6 +7,10 @@ class DailyAverageModel(object):
         source = data.measurements.diff().value[1:]
         self.result = source.mean()
 
+    def valid_for(self, prediction_range):
+        """confirm whether the model can predict for a given range"""
+        return True
+
     def prediction(self, index):
         return Series(self.result, index=index)
 
@@ -16,6 +20,12 @@ class WeekdayAverageModel(object):
         source = data.measurements.diff().value[1:].groupby(data.measurements[1:].index.weekday)
         self.parameters = source.mean()
         self.parameters.name = 'value'
+
+    def valid_for(self, prediction_range):
+        """confirm whether the model can predict for a given range"""
+        index = date_range(start=prediction_range.start_date, end=prediction_range.end_date, freq="MS")
+        result = DataFrame(index=index).join(self.parameters, on=index.weekday).value
+        return result.notnull().all()
 
     def prediction(self, index):
         return DataFrame(index=index).join(self.parameters, on=index.weekday).value
