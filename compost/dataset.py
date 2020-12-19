@@ -44,8 +44,8 @@ class Dataset(object):
             self.data = self.measurements.diff()[1:]
 
         self.timestep = timedelta(seconds=timestep)
-        self.earliest = self.measurements.index.min().to_datetime()
-        self.latest = self.measurements.index.max().to_datetime()
+        self.earliest = self.measurements.index.min().to_pydatetime()
+        self.latest = self.measurements.index.max().to_pydatetime()
 
 
     def total(self):
@@ -59,10 +59,9 @@ class Dataset(object):
             raise ShortDatasetError
 
     def offsets(self):
-        return Series(self.measurements.index.get_values()).diff()[1:]
+        return Series(self.measurements.index.to_numpy()).diff()[1:]
 
     def consistency_check(self):
-
         return (self.offsets() == to_timedelta(self.timestep)).all()
 
     def validate(self):
@@ -98,7 +97,7 @@ class Dataset(object):
         del result["index"]
 
         # interpolate to fill the NaNs
-        result = result.sort().interpolate(method="time", closed='left')
+        result = result.sort_index().interpolate(method="time", closed='left')
 
         try:
             # resample to remove original data

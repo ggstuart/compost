@@ -1,5 +1,5 @@
 import unittest
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from random import randint, random
 from pandas import DataFrame, date_range#, Index
 from numpy import nan
@@ -232,15 +232,14 @@ class TestSavingCalculation(unittest.TestCase):
     def test_something(self):
         class DateRange(object):
             def __init__(self, start, end):
-                self.start_date = start
-                self.end_date = end
+                self.start_date = start.replace(tzinfo=timezone.utc)
+                self.end_date = end.replace(tzinfo=timezone.utc)
         baseline = DateRange(datetime(2015,1,1), datetime(2015,4,30))
         competition = DateRange(datetime(2015,5,1), datetime(2015,8,31))
         sc = SavingCalculation(self.df, DailyAverageModel, competition, baseline, cumulative=False)
         savings = sc.savings()
 
 if __name__ == "__main__":
-    # from pandas import __version__
-    # print(__version__)
-    # exit()
+    from pandas import __version__
+    print(f"pandas v{__version__}")
     unittest.main()
